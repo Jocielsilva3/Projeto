@@ -7,33 +7,36 @@
 #include <Wire.h>
 #include <DallasTemperature.h>
 
-
-//Instacia o Objeto oneWire e seta o pino do sensor para iniciar as leituras
-OneWire oneWire(5);
+OneWire oneWire(5); // sondas de temperatura ligas ao pino 5
 //Repassa as referencias do oneWire para o Sensor Dallas (DS18B20)
 DallasTemperature bus(&oneWire);
 
 // variaveis de armazenamento de dados e estados
-int valor_s1 = 0;
-int valor_s2 = 0;
-int temp_escolhida = 0;
+bool valor_s1 = 0;
+bool valor_s2 = 0;
+bool temp_escolhida = 0;
 byte nSensores = 0;
 byte set_point = 37;
 float tempC;
-float sensor[0]; // Declara o vetor "sensor" para armazenar temperaturas  dos sensores conectados
+float sensor[0]; // Lista usada para armazenar a temperatura dos sensores conectados
 
 // definições de portas
 
+// SENSORES
 #define s1 2 // define contato s1 no pino 2 
 #define s2 3 // define contato s2 no pino 3
 #define up   6 // botão que diminui o setpoint no pino 6
 #define down 7 // botão que aumenta o setpoint no pino 7
+
+// ATUADORES
 #define buzzer 8 // define saída do buzzer para o pino 8
 #define ledVerde 9 // led de sinalização para desligamento pino 9
-#define ledVermelho 10 // led de sinalização para aguardar pino 10 
+#define ledVermelho 10 // led de sinalização para aguardar pino 10
+
+// ATUADORES DO CIRCUITO DE POTÊNCIA 
 #define bomba A0     // define sinal de comando da bomba no pino A0
 #define solenoideTanque A1 // define sinal de comando da válvula do tanque no pino A1
-#define solenoideChuveiro A2 // define sinal de comando da válvula do chuveiro no pino A1
+#define solenoideChuveiro A2 // define sinal de comando da válvula do chuveiro no pino A2
 
 void setup() {
 
@@ -100,7 +103,7 @@ void loop() {
   if ((sensor[2] >= set_point) && (sensor[1] >= set_point)) {
 
     // temperatura setada atingida, sinalização para desligar o sistema
-    temp_escolhida = HIGH;   // escreve nível lógico 1
+    temp_escolhida = HIGH;
     tone(buzzer, 500, 500); // sinalização sonora para desligamento
     digitalWrite(ledVerde, HIGH); // sinalização visual para desligamento
     digitalWrite(ledVermelho, LOW);
@@ -109,7 +112,7 @@ void loop() {
 
   } else {
     // temperatura setada não atingida, sinalização para aguardar
-    temp_escolhida = LOW;  // escreve nível lógico 0
+    temp_escolhida = LOW;
     digitalWrite(ledVermelho, HIGH); // sinalização visual aguardar
     digitalWrite(ledVerde, LOW);
   }
@@ -119,6 +122,7 @@ void loop() {
   Serial.println(temp_escolhida);
 
   // Leitura e exibição dos contatos de nível do tanque
+  // contatos fechados = LOW
   valor_s1 = digitalRead(s1);
   Serial.print("Nível s1: ");
   Serial.println(valor_s1);
@@ -128,16 +132,16 @@ void loop() {
   Serial.println();
 
   // CONTROLE DE PROCESSO
-  // Se as os contatos s1 e s2 estiverem fechados e a temp escolhida não estiver sido alcançada, faça:
+  // Se as os contatos s1 e s2 estiverem fechados e a temp escolhida for alcançada, faça:
   if ((valor_s1 == LOW) && (valor_s2 == LOW) && (temp_escolhida == HIGH)) {
     digitalWrite(bomba, LOW); //bomba ligada
     digitalWrite(solenoideChuveiro, LOW); // solenoide ligada (valvula do chuveiro aberta)
     delay(3000); // delay que visa evitar a pressurização do sistema
     digitalWrite(solenoideTanque, HIGH); // solenoide desligada (valvula do tanque fechada)
-    Serial.println(" bomba ligada e tanque fechado / chuveiro aberto ");
+    Serial.println(" bomba ligada e chuveiro aberto / tanque fechado ");
     Serial.println();
 
-    // esvazia o tanque após a condição do processor ser satisfeita
+    // esvazia o tanque após a condição do processo ser satisfeita
     while (valor_s1 == LOW) {
       valor_s1 = digitalRead(s1);
       Serial.print(" Nível s1: ");
@@ -149,7 +153,7 @@ void loop() {
     }
   } else {
     digitalWrite(bomba, HIGH); // bomba desligada
-    Serial.println(" bomba desligada e valvula aberta ");
+    Serial.println(" bomba desligada e tanque aberto ");
     Serial.println();
   }
 }
