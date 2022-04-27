@@ -7,7 +7,7 @@
 #include <Wire.h>
 #include <DallasTemperature.h>
 
-OneWire oneWire(5); // sondas de temperatura ligas ao pino 5
+OneWire oneWire(5); // sondas de temperatura ligadas ao pino 5
 //Repassa as referencias do oneWire para o Sensor Dallas (DS18B20)
 DallasTemperature bus(&oneWire);
 
@@ -25,8 +25,8 @@ float sensor[0]; // Lista usada para armazenar a temperatura dos sensores conect
 // SENSORES
 #define s1 2 // define contato s1 no pino 2 
 #define s2 3 // define contato s2 no pino 3
-#define up   6 // botão que diminui o setpoint no pino 6
-#define down 7 // botão que aumenta o setpoint no pino 7
+#define up   6 // botão que aumenta o setpoint no pino 6
+#define down 7 // botão que diminui o setpoint no pino 7
 
 // ATUADORES
 #define buzzer 8 // define saída do buzzer para o pino 8
@@ -34,7 +34,7 @@ float sensor[0]; // Lista usada para armazenar a temperatura dos sensores conect
 #define ledVermelho 10 // led de sinalização para aguardar pino 10
 
 // ATUADORES DO CIRCUITO DE POTÊNCIA 
-#define bomba A0     // define sinal de comando da bomba no pino A0
+#define bomba A0 // define sinal de comando da bomba no pino A0
 #define solenoideTanque A1 // define sinal de comando da válvula do tanque no pino A1
 #define solenoideChuveiro A2 // define sinal de comando da válvula do chuveiro no pino A2
 
@@ -67,7 +67,7 @@ void setup() {
 void loop() {
   delay(5);
 
-  //Envia o comando para obter temperaturas
+  //Envia o comando para obter os dados das sondas
   bus.requestTemperatures();
   // Identifica quantas variaveis sensor serão criadas
   for (int i = 0;  i < nSensores;  i++) {
@@ -147,9 +147,6 @@ void loop() {
       Serial.print(" Nível s1: ");
       Serial.println(valor_s1);
       delay(500);
-      digitalWrite(solenoideTanque, HIGH);
-      digitalWrite(solenoideChuveiro, LOW);
-      digitalWrite(bomba, LOW);
     }
   } else {
     digitalWrite(bomba, HIGH); // bomba desligada
