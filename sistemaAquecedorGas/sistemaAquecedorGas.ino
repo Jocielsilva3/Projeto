@@ -33,13 +33,14 @@ float sensor[0]; // Declara o vetor "sensor" para armazenar temperaturas  dos se
 #define ledVermelho 10 // led de sinalização para aguardar pino 10 
 #define bomba A0     // define sinal de comando da bomba no pino A0
 #define solenoideTanque A1 // define sinal de comando da válvula do tanque no pino A1
+#define solenoideChuveiro A2 // define sinal de comando da válvula do chuveiro no pino A1
 
 void setup() {
 
   Serial.begin(9600);
   bus.begin(); // inicializa o objeto sensor
   nSensores = bus.getDeviceCount(); // obtem o número de sensores conectados
-  
+
   // configuração inicial de saídas e entradas
   // resistores de pullup internos ligados nas portas 2,3,4,6 e 7
   pinMode(2, INPUT_PULLUP);
@@ -52,8 +53,12 @@ void setup() {
   pinMode(10, OUTPUT);
   pinMode(A0, OUTPUT);
   pinMode(A1, OUTPUT);
+  pinMode(A2, OUTPUT);
+
+  // lógica do circuito de interface é invertida!!
   digitalWrite(A0, HIGH);
   digitalWrite(A1, LOW);
+  digitalWrite(A2, HIGH);
 }
 
 void loop() {
@@ -86,7 +91,7 @@ void loop() {
     set_point--;
   }
 
-  // Impressão do valor de setpoint
+  // exibição do valor de setpoint
   Serial.print("Setpoint ");
   Serial.print(": ");
   Serial.println(set_point);
@@ -109,11 +114,11 @@ void loop() {
     digitalWrite(ledVerde, LOW);
   }
 
-  // impressão da variavel temp_escolhida
+  // exibição do estado lógico da temperatura escolhida
   Serial.print("Temperatura atingida : ");
   Serial.println(temp_escolhida);
 
-  // Leitura e impressão dos contatos de nível do tanque
+  // Leitura e exibição dos contatos de nível do tanque
   valor_s1 = digitalRead(s1);
   Serial.print("Nível s1: ");
   Serial.println(valor_s1);
@@ -122,12 +127,26 @@ void loop() {
   Serial.println(valor_s2);
   Serial.println();
 
+  // CONTROLE DE PROCESSO
   // Se as os contatos s1 e s2 estiverem fechados e a temp escolhida não estiver sido alcançada, faça:
-  if ((valor_s1 == LOW) && (valor_s2 == LOW) && (temp_escolhida == LOW)) {
+  if ((valor_s1 == LOW) && (valor_s2 == LOW) && (temp_escolhida == HIGH)) {
     digitalWrite(bomba, LOW); //bomba ligada
-    digitalWrite(solenoideTanque, LOW); // solenoide ligada (valvula do tanque aberta)
-    Serial.println(" bomba ligada e Tanque aberto ");
+    digitalWrite(solenoideChuveiro, LOW); // solenoide ligada (valvula do chuveiro aberta)
+    delay(3000); // delay que visa evitar a pressurização do sistema
+    digitalWrite(solenoideTanque, HIGH); // solenoide desligada (valvula do tanque fechada)
+    Serial.println(" bomba ligada e tanque fechado / chuveiro aberto ");
     Serial.println();
+
+    // esvazia o tanque após a condição do processor ser satisfeita
+    while (valor_s1 == LOW) {
+      valor_s1 = digitalRead(s1);
+      Serial.print(" Nível s1: ");
+      Serial.println(valor_s1);
+      delay(500);
+      digitalWrite(solenoideTanque, HIGH);
+      digitalWrite(solenoideChuveiro, LOW);
+      digitalWrite(bomba, LOW);
+    }
   } else {
     digitalWrite(bomba, HIGH); // bomba desligada
     Serial.println(" bomba desligada e valvula aberta ");
