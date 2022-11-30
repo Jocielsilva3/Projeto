@@ -26,10 +26,9 @@ float vetCorrente[200];
 // definições de portas
 
 // SENSORES
-
                 // Sensor de corrente no pino A0
 #define s1 2    // Define contato s1  no pino 2
-#define s2 3    // Define contato s2  no pino 3 \
+#define s2 3    // Define contato s2  no pino 3 
                 // Sensor temperatura no pino 5
 #define up 6    // Botão que aumenta o setpoint no pino 6
 #define down 7  // Botão que diminui o setpoint no pino 7
@@ -105,7 +104,7 @@ void loop() {
   lcd.print(set_point);
   lcd.print(" C ");
   lcd.setCursor(0, 1);
-  lcd.print(" Apos selecao   ");
+  lcd.print(" Após seleção   ");
   lcd.setCursor(0, 2);
   lcd.print(" aperte Amarelo ");
   lcd.setCursor(0, 3);
@@ -165,6 +164,8 @@ void loop() {
       int temp = sensors.getTempCByIndex(0);
 
       lcd.clear();
+      
+      // TELEMETRIA DOS DADOS NO DISPLAY
       // Corrente no motor
       lcd.setCursor(0, 0);
       lcd.print("Carga  motor: ");
@@ -209,15 +210,15 @@ void loop() {
       lcd.print(temp);
       lcd.print(" C");
 
-      // Lógica do sistema de aquecimento abaixo
-      // Solenoide fechada = LOW
-      // Solenoide aberta  = HIGH
+      // Lógica das chaves s1 e s2
+      // Chave fechada = LOW
+      // Chave aberta  = HIGH
 
       // Estrutura de controle duplicada para evitar falso acionamento
-      if ((temp >= set_point) && digitalRead(s1) == !0 && digitalRead(s2) == !0) {
+      if ((temp >= set_point) && digitalRead(s1) == 0 && digitalRead(s2) == 0) {
         delay(1000);
-        if ((temp >= set_point) && digitalRead(s1) == !0 && digitalRead(s2) == !0) {
-      // Se a temperatura definida for atingida, o sensor de nível inferior estiver aberto e o sensor superio estiver aberto:
+        if ((temp >= set_point) && digitalRead(s1) == 0 && digitalRead(s2) == 0) {
+      // Se a temperatura definida for atingida, o sensor de nível inferior estiver fechado e o sensor superior estiver fechado:
 
           tone(buzzer, 1000, 500);                // Sinalização sonora para desligamento
           digitalWrite(ledVermelho, LOW);
@@ -239,9 +240,9 @@ void loop() {
         }
       }
 
-      if ((temp >= set_point) && digitalRead(s1) == 0 && digitalRead(s2) == !0) {
+      if ((temp >= set_point) && digitalRead(s1) == 0 && digitalRead(s2) == 1) {
         delay(1000);
-        if ((temp >= set_point) && digitalRead(s1) == 0 && digitalRead(s2) == !0) {
+        if ((temp >= set_point) && digitalRead(s1) == 0 && digitalRead(s2) == 1) {
           //Se a temperatura definida for atingida, o sensor de nível inferior estiver fechado e o sensor superior estiver aberto:
 
           digitalWrite(ledVerde, LOW);
@@ -254,10 +255,10 @@ void loop() {
         }
       }
 
-      if ((temp >= set_point) && digitalRead(s1) == 0 && digitalRead(s2) == 0) {
+      if ((temp >= set_point) && digitalRead(s1) == 1 && digitalRead(s2) == 1) {
         delay(1000);
-        if ((temp >= set_point) && digitalRead(s1) == 0 && digitalRead(s2) == 0) {
-          //Se a temperatura definida for atingida, o sensor de nível inferior estiver fechado e o sensor superio estiver fechado:
+        if ((temp >= set_point) && digitalRead(s1) == 1 && digitalRead(s2) == 1) {
+          //Se a temperatura definida for atingida, o sensor de nível inferior estiver aberto e o sensor superior estiver aberto:
 
           digitalWrite(ledVerde, HIGH);
           digitalWrite(ledVermelho, LOW);
@@ -269,9 +270,9 @@ void loop() {
         }
       }
 
-      if ((temp < set_point) && digitalRead(s1) == !0 && digitalRead(s2) == !0) {
+      if ((temp < set_point) && digitalRead(s1) == 1 && digitalRead(s2) == 1) {
         delay(1000);
-        if ((temp < set_point) && digitalRead(s1) == !0 && digitalRead(s2) == !0) {
+        if ((temp < set_point) && digitalRead(s1) == 1 && digitalRead(s2) == 1) {
           //Se a temperatura definida não for atingida, o sensor de nível inferior estiver aberto e o sensor superio estiver aberto:
 
           digitalWrite(ledVerde, LOW);
@@ -284,9 +285,9 @@ void loop() {
         }
       }
 
-      if ((temp < set_point) && digitalRead(s1) == 0 && digitalRead(s2) == !0) {
+      if ((temp < set_point) && digitalRead(s1) == 0 && digitalRead(s2) == 1) {
         delay(1000);
-        if ((temp < set_point) && digitalRead(s1) == 0 && digitalRead(s2) == !0) {
+        if ((temp < set_point) && digitalRead(s1) == 0 && digitalRead(s2) == 1) {
           //Se a temperatura definida não for atingida, o sensor de nível inferior estiver fechado e o sensor superio estiver aberto:
 
           digitalWrite(ledVerde, LOW);
@@ -299,10 +300,10 @@ void loop() {
         }
       }
 
-      if ((temp < set_point) && digitalRead(s1) == 0 && digitalRead(s2) == 0) {
+      if ((temp < set_point) && digitalRead(s1) == 1 && digitalRead(s2) == 0) {
         delay(1000);
-        if ((temp < set_point) && digitalRead(s1) == 0 && digitalRead(s2) == 0) {
-          //Se a temperatura definida não for atingida, o sensor de nível inferior estiver fechado e o sensor superior estiver fechado:
+        if ((temp < set_point) && digitalRead(s1) == 1 && digitalRead(s2) == 0) {
+          //Se a temperatura definida não for atingida, o sensor de nível inferior estiver aberto e o sensor superior estiver fechado:
 
           digitalWrite(ledVerde, LOW);            // Apaga LED verde
           digitalWrite(ledVermelho, HIGH);        // Acende LED Vermelho
